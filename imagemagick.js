@@ -300,7 +300,6 @@ exports.crop = function (options, callback) {
         args      = [];
     t.args.forEach(function (arg) {
       if (printNext === true){
-        console.log("arg", arg);
         printNext = false;
       }
       // ignoreArg is set when resize flag was found
@@ -308,12 +307,10 @@ exports.crop = function (options, callback) {
         args.push(arg);
       // found resize flag! ignore the next argument
       if (arg == '-resize'){
-        console.log("resize arg");
         ignoreArg = true;
         printNext = true;
       }
       if (arg === "-crop"){
-        console.log("crop arg");
         printNext = true;
       }
       // found the argument after the resize flag; ignore it and set crop options
@@ -322,12 +319,22 @@ exports.crop = function (options, callback) {
             dDst      = t.opt.width / t.opt.height,
             resizeTo  = (dSrc < dDst) ? ''+t.opt.width+'x' : 'x'+t.opt.height,
             dGravity  = options.gravity ? options.gravity : "Center";
-        args = args.concat([
-          '-resize', resizeTo,
-          '-gravity', dGravity,
-          '-crop', ''+t.opt.width + 'x' + t.opt.height + '+0+0',
-          '+repage'
-        ]);
+        if (options.x !== undefined || options.y !== undefined) {
+          var x = options.x || 0,
+              y = options.y || 0
+              offset = (x >= 0 ? '+'+x : x) + (y >= 0 ? '+'+y : y)
+          args = args.concat([
+            '-crop', ''+t.opt.width + 'x' + t.opt.height + offset,
+            '+repage'
+          ]);
+        } else {
+          args = args.concat([
+            '-resize', resizeTo,
+            '-gravity', dGravity,
+            '-crop', ''+t.opt.width + 'x' + t.opt.height + '+0+0',
+            '+repage'
+          ]);
+        }
         ignoreArg = false;
       }
     })
